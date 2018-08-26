@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SifApp</string>
+    <string name="take_photo">take photos</string>
+    <string name="upload_photo">Upload Photos</string>
 </resources>
