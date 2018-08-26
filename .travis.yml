@@ -1,10 +1,5 @@
 language: android
 android:
   components:
-    - tools
-    - platform-tools
-    - build-tools
-  licenses:
-    - 'android-sdk-preview-license-52d11cd2'
-    - 'android-sdk-license-.+'
-    - 'google-gdk-license-.+'
+    - android-27
+    - build-tools-27.0.3
