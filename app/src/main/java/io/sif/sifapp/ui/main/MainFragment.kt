@@ -1,9 +1,10 @@
 package io.sif.sifapp.ui.main
 
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,10 @@ import android.widget.Button
 import android.widget.TextView
 import io.sif.sifapp.R
 
+
 class MainFragment : Fragment() {
+
+    val REQUEST_IMAGE_CAPTURE = 1
 
     companion object {
         fun newInstance() = MainFragment()
@@ -29,7 +33,10 @@ class MainFragment : Fragment() {
 
         photoButton = view.findViewById<Button>(R.id.photo_button);
         photoButton.setOnClickListener {
-            messageTextView.setText(R.string.take_photo)
+            val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            if (takePictureIntent.resolveActivity(activity?.packageManager) != null) {
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+            }
         }
         uploadButton = view.findViewById<Button>(R.id.upload_button);
         uploadButton.setOnClickListener {
