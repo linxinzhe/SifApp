@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">SifApp</string>
-    <string name="take_photo">take photos</string>
-    <string name="upload_photo">Upload Photos</string>
+    <string name="take_photo">Step1: Take Photos</string>
+    <string name="select_photo">Step2: Select Photos</string>
+    <string name="upload_photo">Step3: Upload Photos</string>
+    <string name="multi_select">Long Press for Multi-selection</string>
 </resources>
