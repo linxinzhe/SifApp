@@ -3,6 +3,10 @@
     <string name="take_photo">Step1: Take Photos</string>
     <string name="select_photo">Step2: Select Photos</string>
     <string name="upload_photo">Step3: Upload Photos</string>
+    <string name="view_3d_maps">Step4: View 3D Maps</string>
     <string name="reset">Step0: Reset</string>
     <string name="multi_select">Long Press for Multi-selection</string>
+    <string name="todo">TO DO</string>
+    <string name="image_preview">Image Preview</string>
+    <string name="title_activity_web_view">Web</string>
 </resources>

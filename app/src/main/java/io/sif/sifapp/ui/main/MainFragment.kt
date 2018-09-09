@@ -10,7 +10,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.util.Log
@@ -37,6 +38,7 @@ class MainFragment : Fragment() {
     private lateinit var photoButton: Button
     private lateinit var selectButton: Button
     private lateinit var uploadButton: Button
+    private lateinit var viewMapsButton: Button
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ImageAdapter
@@ -71,14 +73,25 @@ class MainFragment : Fragment() {
         }
 
         recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView);
-        recyclerView.setLayoutManager(LinearLayoutManager(activity));
+        recyclerView.setLayoutManager(GridLayoutManager(activity, 3));
         adapter = ImageAdapter(activity!!.baseContext, imageList)
         recyclerView.adapter = adapter
+        recyclerView.addItemDecoration(DividerItemDecoration(
+                activity, DividerItemDecoration.VERTICAL));
 
         uploadButton = view.findViewById<Button>(R.id.upload_button);
         uploadButton.setOnClickListener {
-
+            Toast.makeText(activity, R.string.todo, Toast.LENGTH_SHORT).show()
         }
+
+        viewMapsButton = view.findViewById<Button>(R.id.view_maps_button);
+        viewMapsButton.setOnClickListener {
+            val url = "http://sif.linxz.top:8080/reconstruction.html#file=/data/berlin/reconstruction.meshed.json"
+            val webpage = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, webpage)
+            startActivity(intent)
+        }
+
 
         return view;
     }
