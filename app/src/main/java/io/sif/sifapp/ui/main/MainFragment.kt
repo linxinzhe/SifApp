@@ -1,5 +1,6 @@
 package io.sif.sifapp.ui.main
 
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -21,11 +22,18 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.sif.sifapp.AppConfig
 import io.sif.sifapp.R
+import okhttp3.*
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 
 class MainFragment : Fragment() {
+
+    val TAG = MainFragment.javaClass.simpleName
 
     val REQUEST_IMAGE_CAPTURE = 1
     val REQUEST_IMAGE_PICK = 2
@@ -44,6 +52,8 @@ class MainFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ImageAdapter
     private var imageList: MutableList<Bitmap> = mutableListOf()
+
+    private val client = OkHttpClient()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -103,7 +113,44 @@ class MainFragment : Fragment() {
     }
 
     private fun uploadPhotos() {
-        Toast.makeText(activity, R.string.todo, Toast.LENGTH_SHORT).show()
+        for ((index, image) in imageList.withIndex()) {
+
+            val baos = ByteArrayOutputStream()
+            image.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+            val toByteArray = baos.toByteArray()
+
+            MultipartBody.create(MediaType.parse("image/jpeg"), toByteArray)
+
+            val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
+
+            requestBody.addFormDataPart("file", index.toString() + ".jpg", RequestBody.create(MediaType.parse("image/*"), toByteArray))
+
+            val request = Request.Builder()
+                    .url(AppConfig.ENDPOINT + "/map/imgUpload")
+                    .post(requestBody.build())
+                    .build();
+
+            val response = client.newCall(request).enqueue(object : Callback {
+                @SuppressLint("CheckResult")
+                override fun onFailure(call: Call, e: IOException) {
+                    Observable.just("").observeOn(AndroidSchedulers.mainThread()).subscribe {
+                        Log.e(TAG, e.message)
+                        Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                @SuppressLint("CheckResult")
+                override fun onResponse(call: Call, response: Response) {
+                    val str = response.body()?.string()
+                    Observable.just("").observeOn(AndroidSchedulers.mainThread()).subscribe {
+                        Log.d(TAG, str)
+                        Toast.makeText(activity, str, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+        }
+
+
     }
 
     private fun viewMaps() {
@@ -145,7 +192,6 @@ class MainFragment : Fragment() {
                 val uri = data.data
                 val bitmap = getBitmapFromUri(uri)
                 imageList.add(bitmap)
-
             } else {
                 val clipData = data.clipData
                 val count = clipData.itemCount
@@ -167,10 +213,8 @@ class MainFragment : Fragment() {
         val fileDescriptor = parcelFileDescriptor?.fileDescriptor
 
         val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
-        Log.d(MainFragment.javaClass.simpleName, "getBitmapFromUri: image: " + image.byteCount)
 
-        val resized = Bitmap.createScaledBitmap(image, 4 * 400, 3 * 400, true)
-        Log.d(MainFragment.javaClass.simpleName, "getBitmapFromUri: resize: " + resized.byteCount)
+        val resized = Bitmap.createScaledBitmap(image, 3 * 400, 4 * 400, true)
 
         parcelFileDescriptor?.close()
 
