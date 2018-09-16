@@ -148,11 +148,15 @@ class MainFragment : Fragment() {
         val parcelFileDescriptor = activity?.contentResolver?.openFileDescriptor(uri, "r")
         val fileDescriptor = parcelFileDescriptor?.fileDescriptor
 
-        //TODO Resize BitMap
         val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+        Log.d(MainFragment.javaClass.simpleName, "getBitmapFromUri: image: " + image.byteCount)
+
+        val resized = Bitmap.createScaledBitmap(image, 4 * 400, 3 * 400, true)
+        Log.d(MainFragment.javaClass.simpleName, "getBitmapFromUri: resize: " + resized.byteCount)
+
         parcelFileDescriptor?.close()
 
-        return image
+        return resized
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
