@@ -29,6 +29,8 @@ import io.sif.sifapp.R
 import okhttp3.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainFragment : Fragment() {
@@ -113,6 +115,42 @@ class MainFragment : Fragment() {
     }
 
     private fun uploadPhotos() {
+        //start upload
+        val time = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Date())
+        val dirname = android.os.Build.MODEL + "_" + android.os.Build.VERSION.RELEASE + "_" + time;
+        Log.d(TAG, dirname)
+
+        val request = Request.Builder()
+                .url(AppConfig.ENDPOINT + "/map/startUpload" + "?dirname=" + dirname)
+                .get()
+                .build();
+
+        val response = client.newCall(request).enqueue(object : Callback {
+            @SuppressLint("CheckResult")
+            override fun onFailure(call: Call, e: IOException) {
+                Observable.just("").observeOn(AndroidSchedulers.mainThread()).subscribe {
+                    Log.e(TAG, e.message)
+                    Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            @SuppressLint("CheckResult")
+            override fun onResponse(call: Call, response: Response) {
+                val str = response.body()?.string()
+                Observable.just("").observeOn(AndroidSchedulers.mainThread()).subscribe {
+                    Log.d(TAG, str)
+                    Toast.makeText(activity, str, Toast.LENGTH_SHORT).show()
+
+                    //upload
+                    upload(dirname)
+                }
+            }
+        })
+
+
+    }
+
+    fun upload(dirname: String) {
         for ((index, image) in imageList.withIndex()) {
 
             val baos = ByteArrayOutputStream()
@@ -124,6 +162,7 @@ class MainFragment : Fragment() {
             val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
 
             requestBody.addFormDataPart("file", index.toString() + ".jpg", RequestBody.create(MediaType.parse("image/*"), toByteArray))
+            requestBody.addFormDataPart("dirname", dirname)
 
             val request = Request.Builder()
                     .url(AppConfig.ENDPOINT + "/map/imgUpload")
@@ -145,13 +184,42 @@ class MainFragment : Fragment() {
                     Observable.just("").observeOn(AndroidSchedulers.mainThread()).subscribe {
                         Log.d(TAG, str)
                         Toast.makeText(activity, str, Toast.LENGTH_SHORT).show()
+
+                        if (index == imageList.size - 1) {
+                            endUpload(dirname)
+                        }
                     }
                 }
             })
         }
-
-
     }
+
+    fun endUpload(dirname: String) {
+        val request = Request.Builder()
+                .url(AppConfig.ENDPOINT + "/map/endUpload" + "?dirname=" + dirname)
+                .get()
+                .build();
+
+        val response = client.newCall(request).enqueue(object : Callback {
+            @SuppressLint("CheckResult")
+            override fun onFailure(call: Call, e: IOException) {
+                Observable.just("").observeOn(AndroidSchedulers.mainThread()).subscribe {
+                    Log.e(TAG, e.message)
+                    Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            @SuppressLint("CheckResult")
+            override fun onResponse(call: Call, response: Response) {
+                val str = response.body()?.string()
+                Observable.just("").observeOn(AndroidSchedulers.mainThread()).subscribe {
+                    Log.d(TAG, str)
+                    Toast.makeText(activity, str, Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
 
     private fun viewMaps() {
         val url = AppConfig.ENDPOINT + "/reconstruction.html#file=/data/berlin/reconstruction.meshed.json"
