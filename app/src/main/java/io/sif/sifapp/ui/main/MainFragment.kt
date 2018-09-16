@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import io.sif.sifapp.AppConfig
 import io.sif.sifapp.R
 
 
@@ -56,45 +57,62 @@ class MainFragment : Fragment() {
 
         photoButton = view.findViewById<Button>(R.id.photo_button);
         photoButton.setOnClickListener {
-            val takePictureIntent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
-            if (takePictureIntent.resolveActivity(activity?.packageManager) != null) {
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-            }
+            takePhotos()
         }
         selectButton = view.findViewById<Button>(R.id.select_button);
         selectButton.setOnClickListener {
-            Toast.makeText(activity, R.string.multi_select, Toast.LENGTH_SHORT).show()
-
-            val intent = Intent()
-            intent.type = "image/*"
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            intent.action = Intent.ACTION_GET_CONTENT
-            startActivityForResult(intent, REQUEST_IMAGE_PICK);
+            selectPhotots();
         }
 
         recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView);
         recyclerView.setLayoutManager(GridLayoutManager(activity, 3));
         adapter = ImageAdapter(activity!!.baseContext, imageList)
         recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(
-                activity, DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.HORIZONTAL));
 
         uploadButton = view.findViewById<Button>(R.id.upload_button);
         uploadButton.setOnClickListener {
-            Toast.makeText(activity, R.string.todo, Toast.LENGTH_SHORT).show()
+            uploadPhotos()
         }
 
         viewMapsButton = view.findViewById<Button>(R.id.view_maps_button);
         viewMapsButton.setOnClickListener {
-            val url = "http://sif.linxz.top:8080/reconstruction.html#file=/data/berlin/reconstruction.meshed.json"
-            val webpage = Uri.parse(url)
-            val intent = Intent(Intent.ACTION_VIEW, webpage)
-            startActivity(intent)
+            viewMaps()
         }
 
 
         return view;
     }
+
+    private fun takePhotos() {
+        val takePictureIntent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
+        if (takePictureIntent.resolveActivity(activity?.packageManager) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+        }
+    }
+
+    private fun selectPhotots() {
+        Toast.makeText(activity, R.string.multi_select, Toast.LENGTH_SHORT).show()
+
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(intent, REQUEST_IMAGE_PICK)
+    }
+
+    private fun uploadPhotos() {
+        Toast.makeText(activity, R.string.todo, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun viewMaps() {
+        val url = AppConfig.ENDPOINT + "/reconstruction.html#file=/data/berlin/reconstruction.meshed.json"
+        val webpage = Uri.parse(url)
+        val intent = Intent(Intent.ACTION_VIEW, webpage)
+        startActivity(intent)
+    }
+
 
     class ImageAdapter(private var context: Context, private var imageList: MutableList<Bitmap>) : RecyclerView.Adapter<ImageAdapter.MyViewHolder>() {
 
